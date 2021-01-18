@@ -4,7 +4,7 @@ import threading
 import pynmea2
 import os
 import re
-from git_comunication import synchronize_data
+from rinex_conv import Convert2RinexAndSync
 
 
 class SerialNmeaRead(threading.Thread):
@@ -29,17 +29,19 @@ class SerialNmeaRead(threading.Thread):
             else:
                 print("Successfully created the directory %s " % logging_path)
 
-        str_date = time.strftime("%Y_%m_%d", time.localtime()+3600)
+        str_date = time.strftime("%Y_%m_%d", time.localtime())
         # predelat na hodiny# delete seconds
         str_time = str(gga_time)[0:-3].replace(":", "_")
-        new_file_name = logging_path + os.path.sep + str_date + "_" + str_time + ".log"
+        new_file_name = logging_path + os.path.sep + str_date + "_" + str_time + ".ubx"
 
         if self.file_name == "":
             self.file_name = new_file_name
         elif self.file_name != new_file_name:
+            old_file_name = self.file_name
+            # update new name
             self.file_name = new_file_name
-            # synchronize_data()
-            print("odeslani starych dat na git")
+            # convert *.ubx log to RINEX and synchronize data
+            Convert2RinexAndSync(old_file_name).start()
 
     def get_GGA_timestamp(self, serial_data):
 
@@ -55,15 +57,16 @@ class SerialNmeaRead(threading.Thread):
         The method that actually gets data from the port
         '''
         while not self.stopped():
-            serial_data = self.serial_object.readline().decode('ascii')
+            serial_data = self.serial_object.readline()
 
             try:
 
-                self.get_GGA_timestamp(serial_data)
+                self.get_GGA_timestamp(
+                    serial_data.decode("ascii", errors="replace"))
 
                 if self.file_name != "":
-                    with open(self.file_name, "a", encoding="utf-8") as f:
-                        f.write(serial_data.strip("\n"))
+                    with open(self.file_name, "ab") as f:
+                        f.write(serial_data)
 
             except:
                 print('Some error in data: ', serial_data)
@@ -76,7 +79,7 @@ class SerialNmeaRead(threading.Thread):
         return self._stop_event.is_set()
 
 
-serial_thread = SerialNmeaRead('COM5', 38400)
+serial_thread = SerialNmeaRead('/dev/ttyACM2', 38400)
 serial_thread.start()
 
 x = input('Enter anything to cancel window:\n')
