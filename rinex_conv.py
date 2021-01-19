@@ -43,11 +43,3 @@ class Convert2RinexAndSync(threading.Thread):
         # synchronize_data()
         print("Synchronizing is done:")
         print("============================\n")
-
-
-if __name__ == "__main__":
-
-    file_name = "2021_01_18_14_20.ubx"
-    a = Convert2RinexAndSync(file_name)
-
-    a.start()
