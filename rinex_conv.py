@@ -40,6 +40,6 @@ class Convert2RinexAndSync(threading.Thread):
         self._stop_event.set()
         print("Converting to RINEX is done:")
         print("============================")
-        # synchronize_data()
+        synchronize_data()
         print("Synchronizing is done:")
         print("============================\n")
