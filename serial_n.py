@@ -25,9 +25,9 @@ class SerialNmeaRead(threading.Thread):
             try:
                 os.mkdir(logging_path)
             except OSError:
-                print("Creation of the directory %s failed" % logging_path)
+                print("Creation of the directory {} failed".format(logging_path))
             else:
-                print("Successfully created the directory %s " % logging_path)
+                print("Successfully created the directory {} ".format(logging_path))
 
         if self.file_name == "":
             self.file_name = ZDA_file_name
