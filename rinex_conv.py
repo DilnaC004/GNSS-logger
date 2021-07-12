@@ -24,7 +24,7 @@ def connected_USB():
 
     try:
         out = subprocess.check_output(
-            'lsblk | grep sdb | grep media', shell=True).decode('ascii')
+            'lsblk | grep sd | grep /media', shell=True).decode('ascii')
 
         for line in out.split('\n'):
             splitted = line.split()
