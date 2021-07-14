@@ -75,10 +75,16 @@ class Convert2RinexAndSync(threading.Thread):
         self._stop_event.set()
         print("Converting to RINEX is done:")
         print("============================")
-        synchronize_data()
-        save_file_to_USB("./RINEX/" + self.log_file_name[5:-4] + ".*")
-        print("Synchronizing is done:")
-        print("============================\n")
+        try:
+            synchronize_data()
+            save_file_to_USB("./RINEX/" + self.log_file_name[5:-4] + ".*")
+            save_file_to_USB(self.log_file_name)
+            print("Synchronizing is done:")
+            print("============================\n")
+        except Exception as err:
+            print("Some error in synchronization data on git or USB")
+            print(err)
+            print("============================\n")
 
 
 if __name__ == "__main__":
