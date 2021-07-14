@@ -24,7 +24,7 @@ def connected_USB():
 
     try:
         out = subprocess.check_output(
-            'lsblk | grep sd | grep /media', shell=True).decode('ascii')
+            'lsblk | grep sd | grep /media', shell=True).decode('utf-8')
 
         for line in out.split('\n'):
             splitted = line.split()
@@ -33,8 +33,9 @@ def connected_USB():
 
         return usb
 
-    except:
+    except Exception as err:
         print("Some error in finding connected USBs")
+        print(err)
         return []
 
 
@@ -78,3 +79,8 @@ class Convert2RinexAndSync(threading.Thread):
         save_file_to_USB("./RINEX/" + self.log_file_name[5:-4] + ".*")
         print("Synchronizing is done:")
         print("============================\n")
+
+
+if __name__ == "__main__":
+
+    print(connected_USB())
