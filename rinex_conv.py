@@ -1,42 +1,7 @@
 import threading
 import subprocess
 import os
-from git_comunication import synchronize_data
-
-
-def save_file_to_USB(file_name):
-
-    USBs = connected_USB()
-
-    for usb in USBs:
-        try:
-            out = subprocess.check_output(
-                "cp {} {}".format(file_name, usb), shell=True)
-        except:
-            print("Some error in copying files {}".format(file_name))
-            print(out)
-        pass
-
-
-def connected_USB():
-    ''' Function which find all connected USB and return their list.'''
-    usb = []
-
-    try:
-        out = subprocess.check_output(
-            'lsblk | grep sd | grep /media', shell=True).decode('utf-8')
-
-        for line in out.split('\n'):
-            splitted = line.split()
-            if len(splitted) > 1 and splitted[-1] != "":
-                usb.append(line.split()[-1])
-
-        return usb
-
-    except Exception as err:
-        print("Some error in finding connected USBs")
-        print(err)
-        return []
+from synchronize_data import synchronize_git, synchronize_ftp, synchronize_usb
 
 
 class Convert2RinexAndSync(threading.Thread):
@@ -47,10 +12,12 @@ class Convert2RinexAndSync(threading.Thread):
     After that are all files synchronized.
     '''
 
-    def __init__(self, log_file_name):
+    def __init__(self, log_file_name, directory="Test", ftp_acess=None):
         super().__init__()
         self._stop_event = threading.Event()
         self.log_file_name = log_file_name
+        self.directory = directory
+        self.ftp_acess = ftp_acess
 
     def check_folder(self):
 
@@ -76,17 +43,15 @@ class Convert2RinexAndSync(threading.Thread):
         print("Converting to RINEX is done:")
         print("============================")
         try:
-            synchronize_data()
-            save_file_to_USB("./RINEX/" + self.log_file_name[5:-4] + ".*")
-            save_file_to_USB(self.log_file_name)
-            print("Synchronizing is done:")
+            # synchronize_git()
+            synchronize_usb(
+                "./RINEX/" + self.log_file_name[5:-4] + ".*", self.directory)
+            synchronize_usb(self.log_file_name, self.directory)
+            synchronize_ftp(
+                "./RINEX/" + self.log_file_name[5:-4] + ".*", self.directory)
+            synchronize_ftp(self.log_file_name, self.directory)
             print("============================\n")
         except Exception as err:
             print("Some error in synchronization data on git or USB")
             print(err)
             print("============================\n")
-
-
-if __name__ == "__main__":
-
-    print(connected_USB())
