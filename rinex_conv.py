@@ -12,10 +12,11 @@ class Convert2RinexAndSync(threading.Thread):
     After that are all files synchronized.
     '''
 
-    def __init__(self, log_file_name, directory="Test", ftp_acess=None):
+    def __init__(self, log_file_path, directory="Test", ftp_acess=None):
         super().__init__()
         self._stop_event = threading.Event()
-        self.log_file_name = log_file_name
+        self.log_file_path = log_file_path
+        self.log_file_name = os.path.split(log_file_path)[-1]
         self.directory = directory
         self.ftp_acess = ftp_acess
 
@@ -30,12 +31,24 @@ class Convert2RinexAndSync(threading.Thread):
             else:
                 print("Successfully created the directory {}".format(logging_path))
 
+        if not os.path.exists((logging_full_path := os.path.join(logging_path, self.directory))):
+            try:
+                os.mkdir(logging_full_path)
+            except OSError:
+                print("Creation of the directory {} failed".format(
+                    logging_full_path))
+            else:
+                print("Successfully created the directory {}".format(
+                    logging_full_path))
+
     def run(self):
 
         self.check_folder()
-        print(self.log_file_name[5:-4])
+
+        file_name_with_dir = os.path.join(self.directory, self.log_file_name)
+        print(file_name_with_dir)
         subprocess.run("convbin -od -os -oi -ot -f 2 -hc 'GNSS logger application' -o ./RINEX/{0}.obs -n ./RINEX/{0}.nav -g ./RINEX/{0}.gnav ./LOGS/{0}.ubx".format(
-            self.log_file_name[5:-4]), shell=True)
+            file_name_with_dir[0:-4]), shell=True)
         self.stop()
 
     def stop(self):
@@ -45,11 +58,11 @@ class Convert2RinexAndSync(threading.Thread):
         try:
             # synchronize_git()
             synchronize_usb(
-                "./RINEX/" + self.log_file_name[5:-4] + ".*", self.directory)
-            synchronize_usb(self.log_file_name, self.directory)
+                os.path.join("RINEX", self.directory, self.log_file_name[:-4]) + ".*", self.directory)
+            synchronize_usb(self.log_file_path, self.directory)
             synchronize_ftp(
-                "./RINEX/" + self.log_file_name[5:-4] + ".*", self.directory)
-            synchronize_ftp(self.log_file_name, self.directory)
+                os.path.join("RINEX", self.directory, self.log_file_name[:-4]) + ".*", self.directory)
+            synchronize_ftp(self.log_file_path, self.directory)
             print("============================\n")
         except Exception as err:
             print("Some error in synchronization data on git or USB")

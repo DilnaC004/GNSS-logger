@@ -31,7 +31,8 @@ class SerialNmeaRead(threading.Thread):
             else:
                 print("Successfully created the directory {} ".format(logging_path))
 
-        actual_file_name = os.path.join(logging_path, ZDA_file_name)
+        actual_file_name = os.path.join(
+            logging_path, self.directory,  ZDA_file_name)
 
         if self.file_name == "":
             self.file_name = actual_file_name
