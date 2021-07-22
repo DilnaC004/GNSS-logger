@@ -4,6 +4,8 @@ import urllib.request
 import subprocess
 from ftplib import FTP
 
+MAIN_DIR = "GNSS_LOGGER"
+
 
 def synchronize_git():
     '''
@@ -48,24 +50,20 @@ def check_git_directory():
         return False
 
 
-def synchronize_ftp(ftp_acess, file_names, directory=""):
-
-    if isinstance(file_names, list):
-        file_names = [file_names]
+def synchronize_ftp(ftp_acess, directory=""):
 
     if internet_connection() and ftp_acess:
 
         try:
-            host, user, passwd = ftp_acess.split("|")
+            host, user, passwd = ftp_acess.split("::")
 
             with FTP(host=host, user=user, passwd=passwd) as ftp:
 
                 # check if exist GNSS_LOGGER directory
-                main_logger_dir = "GNSS_LOGGER"
-                if main_logger_dir not in ftp.nlst():
-                    ftp.mkd(main_logger_dir)
+                if MAIN_DIR not in ftp.nlst():
+                    ftp.mkd(MAIN_DIR)
 
-                ftp.cwd(main_logger_dir)
+                ftp.cwd(MAIN_DIR)
 
                 # check if exist project directory
                 if directory != "" and (directory not in ftp.nlst()):
@@ -73,38 +71,72 @@ def synchronize_ftp(ftp_acess, file_names, directory=""):
 
                 ftp.cwd(directory)
 
-                for file_name in file_names:
+                # get all unsync files
+                rnx_files = get_files_pc_folder(
+                    os.path.join("RINEX", directory))
+                log_files = get_files_pc_folder(
+                    os.path.join("LOGS", directory))
+                ftp_files = ftp.nlst()
 
-                    if os.path.exists(file_name):
-                        with open(file_name, 'rb') as file:
+                unsync_files = compare_files_pc_ftp(
+                    log_files, rnx_files, ftp_files, directory)
+
+                for file_path in unsync_files:
+                    if os.path.exists(file_path):
+                        with open(file_path, 'rb') as file:
                             try:
                                 ftp.storbinary(
-                                    "STOR {}".format(file_name), file)
-                                print("File {} was saved to ftp".format(file_name))
-                            except:
+                                    "STOR {}".format(os.path.basename(file_path)), file)
+                                print("File {} was saved to ftp".format(file_path))
+                            except Exception as error:
                                 print(
-                                    "Problem with saving file {} on ftp".format(file_name))
+                                    "Problem with saving file {} on ftp:\n{}".format(file_path, error))
+
                     else:
-                        print("File {} doesnt exist".format(file_name))
+                        print("File {} doesnt exist".format(file_path))
         except Exception as error:
             print("Some error in sync data to ftp :\n{}".format(error))
     else:
         print("Cannot synchronize data to FTP - no internet connection or ftp access")
 
 
-def synchronize_usb(file_name, directory=""):
+def synchronize_usb(file_path, directory=""):
 
     USBs = connected_USB()
 
     for usb in USBs:
         try:
+            usb_folder_path = os.path.join(usb, MAIN_DIR, directory)
+            # try to create all folders
+            os.makedirs(usb_folder_path, exist_ok=True)
+            # copy files
             out = subprocess.check_output(
-                "cp {} {}".format(file_name, os.path.join(usb, directory)), shell=True)
-            print("File {} was saved to usb {}".format(file_name, usb))
+                "cp {} {}".format(file_path, usb_folder_path), shell=True)
+            print("File {} was saved to usb {}".format(
+                file_path, usb_folder_path))
         except:
-            print("Some error in copying files {}".format(file_name))
+            print("Some error in copying files {}".format(file_path))
             print(out)
         pass
+
+
+def get_files_pc_folder(path):
+    return next(os.walk(path), (None, None, []))[2]
+
+
+def compare_files_pc_ftp(pc_log, pc_rnx, ftp_all, directory):
+
+    no_sync_files = []
+
+    for f in pc_log:
+        if not (f in ftp_all):
+            no_sync_files.append(os.path.join("LOGS", directory, f))
+
+    for f in pc_rnx:
+        if not (f in ftp_all):
+            no_sync_files.append(os.path.join("RINEX", directory, f))
+
+    return no_sync_files
 
 
 def connected_USB():
@@ -123,8 +155,8 @@ def connected_USB():
         return usb
 
     except Exception as err:
-        print("Some error in finding connected USBs")
-        print(err)
+        # print("Some error in finding connected USBs")
+        # print(err)
         return []
 
 

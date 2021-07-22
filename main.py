@@ -12,10 +12,10 @@ if __name__ == "__main__":
     ap.add_argument("-d", "--directory", default="Test",
                     help='The name of the folder where the data will be stored (default "Test")')
     ap.add_argument("-f", "--ftp", default=None,
-                    help="FTP access data, format <server_adress>|<user_name>|<password>")
+                    help="FTP access data, format <server_adress>::<user_name>::<password>")
     args = ap.parse_args()
 
-    if isinstance(args.ftp, str) and len(args.ftp.split("|")) != 3:
+    if isinstance(args.ftp, str) and len(args.ftp.split("::")) != 3:
         ap.error("Argument FTP isnt in correct format")
 
     # Start serial communication
@@ -33,7 +33,4 @@ if __name__ == "__main__":
     serial.stop()
     print("End of script")
 
-
-# TODO: pridat parametr folder, do ktere se budou tridit vsechny data usb,ftp,rasp - DONE
-# TODO: zapis na FTP - DONE
-# TODO: prohledani slozky na ftp a synchronizace nezalohovanych dat
+# TODO: vymazani souboru, aby se nazaplnila pamet
