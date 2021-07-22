@@ -2,6 +2,7 @@ import os
 import git
 import urllib.request
 import subprocess
+from ftplib import FTP
 
 
 def synchronize_git():
@@ -47,12 +48,48 @@ def check_git_directory():
         return False
 
 
-def synchronize_ftp(file_name, directory=""):
+def synchronize_ftp(ftp_acess, file_names, directory=""):
 
-    if internet_connection():
-        print("File {} was saved to ftp".format(file_name))
+    if isinstance(file_names, list):
+        file_names = [file_names]
+
+    if internet_connection() and ftp_acess:
+
+        try:
+            host, user, passwd = ftp_acess.split("|")
+
+            with FTP(host=host, user=user, passwd=passwd) as ftp:
+
+                # check if exist GNSS_LOGGER directory
+                main_logger_dir = "GNSS_LOGGER"
+                if main_logger_dir not in ftp.nlst():
+                    ftp.mkd(main_logger_dir)
+
+                ftp.cwd(main_logger_dir)
+
+                # check if exist project directory
+                if directory != "" and (directory not in ftp.nlst()):
+                    ftp.mkd(directory)
+
+                ftp.cwd(directory)
+
+                for file_name in file_names:
+
+                    if os.path.exists(file_name):
+                        with open(file_name, 'rb') as file:
+                            try:
+                                ftp.storbinary(
+                                    "STOR {}".format(file_name), file)
+                                print("File {} was saved to ftp".format(file_name))
+                            except:
+                                print(
+                                    "Problem with saving file {} on ftp".format(file_name))
+                    else:
+                        print("File {} doesnt exist".format(file_name))
+        except Exception as error:
+            print("Some error in sync data to ftp :\n{}".format(error))
     else:
-        print("Cannot synchronize data to FTP - no internet connection")
+        print("Cannot synchronize data to FTP - no internet connection or ftp access")
 
 
 def synchronize_usb(file_name, directory=""):

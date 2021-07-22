@@ -22,17 +22,17 @@ class SerialNmeaRead(threading.Thread):
 
     def define_file_name(self, ZDA_file_name):
 
-        logging_path = "LOGS"
-        if not os.path.exists(logging_path):
+        logging_dir = "LOGS"
+        if not os.path.exists(logging_dir):
             try:
-                os.mkdir(logging_path)
+                os.mkdir(logging_dir)
             except OSError:
-                print("Creation of the directory {} failed".format(logging_path))
+                print("Creation of the directory {} failed".format(logging_dir))
             else:
-                print("Successfully created the directory {} ".format(logging_path))
+                print("Successfully created the directory {} ".format(logging_dir))
 
         actual_file_name = os.path.join(
-            logging_path, self.directory,  ZDA_file_name)
+            logging_dir, self.directory,  ZDA_file_name)
 
         if self.file_name == "":
             self.file_name = actual_file_name
