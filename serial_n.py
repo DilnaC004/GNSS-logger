@@ -12,31 +12,37 @@ class SerialNmeaRead(threading.Thread):
     The class with the method that reads the serial port in the backgroud.
     '''
 
-    def __init__(self, com_port, baudrate=38400):
+    def __init__(self, directory, com_port, baudrate=38400, ftp_acess=None):
         super().__init__()
         self._stop_event = threading.Event()
-        self.serial_object = serial.Serial(com_port, baudrate)
+        self.directory = directory
+        self.serial_object = serial.Serial(com_port, int(baudrate))
+        self.ftp_acess = ftp_acess
         self.file_name = ""
 
     def define_file_name(self, ZDA_file_name):
 
-        logging_path = "LOGS"
-        if not os.path.exists(logging_path):
+        logging_dir = os.path.join("LOGS", self.directory)
+        if not os.path.exists(logging_dir):
             try:
-                os.mkdir(logging_path)
+                os.makedirs(logging_dir)
             except OSError:
-                print("Creation of the directory %s failed" % logging_path)
+                print("Creation of the directory {} failed".format(logging_dir))
             else:
-                print("Successfully created the directory %s " % logging_path)
+                print("Successfully created the directory {} ".format(logging_dir))
+
+        actual_file_name = os.path.join(
+            logging_dir,  ZDA_file_name)
 
         if self.file_name == "":
-            self.file_name = ZDA_file_name
-        elif self.file_name != ZDA_file_name:
+            self.file_name = actual_file_name
+        elif self.file_name != actual_file_name:
             old_file_name = self.file_name
             # update new name
-            self.file_name = ZDA_file_name
+            self.file_name = actual_file_name
             # convert *.ubx log to RINEX and synchronize data
-            Convert2RinexAndSync(old_file_name).start()
+            Convert2RinexAndSync(
+                old_file_name, self.directory, self.ftp_acess).start()
 
     def get_ZDA_timestamp(self, serial_data):
 
@@ -48,6 +54,8 @@ class SerialNmeaRead(threading.Thread):
             ZDA_file_name = str(ZDA_parse.year) + "_" + str(ZDA_parse.month)+"_" + \
                 str(ZDA_parse.day) + "_" + \
                 str(ZDA_parse.timestamp)[0:2] + "_00_00.ubx"
+            # str(ZDA_parse.timestamp)[0:2] + "_" + \ # FOR DEVELOP log in minutes
+            # str(ZDA_parse.timestamp)[3:5] + "_00.ubx"
             self.define_file_name(ZDA_file_name)
 
     def get_GGA_timestamp(self, serial_data):
@@ -66,18 +74,19 @@ class SerialNmeaRead(threading.Thread):
         while not self.stopped():
             serial_data = self.serial_object.readline()
 
-            # try:
+            try:
 
-            self.get_ZDA_timestamp(
-                serial_data.decode("ascii", errors="replace"))
+                self.get_ZDA_timestamp(
+                    serial_data.decode("ascii", errors="replace"))
 
-            if self.file_name != "":
-                # open file as append-binary
-                with open(self.file_name, "ab") as f:
-                    f.write(serial_data)
+                if self.file_name != "":
+                    # open file as append-binary
+                    with open(self.file_name, "ab") as f:
+                        f.write(serial_data)
 
-            # except:
-            #    print('Some error in data: ', serial_data)
+            except Exception as error:
+                print('Some error in data: ', serial_data)
+                print(error)
 
     def stop(self):
         self._stop_event.set()
