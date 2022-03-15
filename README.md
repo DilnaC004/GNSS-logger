@@ -21,3 +21,8 @@ příklad spuštění :
 ```bash
 python3 main.py -p /dev/ttyACM0 -b 38400
 ```
+
+TODO: 
+* mazání zasynchronizovanych dat 
+* opakované odesílání - např. výpadek internetu
+* logování eventů do souboru
