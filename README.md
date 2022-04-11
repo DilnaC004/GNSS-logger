@@ -19,7 +19,7 @@ parametry :
 příklad spuštění :
 
 ```bash
-python3 main.py -p /dev/ttyACM0 -b 38400
+python3 main.py -p /dev/ttyACM0 -b 38400 -d .
 ```
 
 TODO: 
