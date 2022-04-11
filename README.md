@@ -22,6 +22,11 @@ příklad spuštění :
 python3 main.py -p /dev/ttyACM0 -b 38400 -d .
 ```
 
+Nastavení zpráv U-blox přijímače:
+* RXM-RAWX
+* RXM-SFRBX
+* NMEA-ZDA
+
 TODO: 
 * mazání zasynchronizovanych dat 
 * opakované odesílání - např. výpadek internetu
