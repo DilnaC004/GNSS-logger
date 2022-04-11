@@ -13,7 +13,7 @@ parametry :
 -p | --port_name : specifikace sériového portu
 -b | --baudrate  : nastavení rychlosti komunikace seriového portu (defaultně 38400)
 -d | --directory : specifikováni nazvu projektu do jehož slozky se budou data ukládat (defaultně "Test")
--f | --ftp       : přístupové údaje na ftp server, formát  <server_adress>|<user_name>|<password> (defaultně None)
+-f | --ftp       : přístupové údaje na ftp server, formát  <server_adress>::<user_name>::<password> (defaultně None)
 ```
 
 příklad spuštění :
