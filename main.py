@@ -1,6 +1,14 @@
 import argparse
-from serial_n import SerialNmeaRead
+import logging
 
+from serial_n import SerialNmeaRead
+from datetime import datetime as dt
+
+
+actual_time = dt.utcnow()
+logging.basicConfig(filename=actual_time.strftime(
+    "%Y_%m_%d__%H_%M_%S_log.txt"), encoding="utf-8", level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
 
@@ -20,9 +28,10 @@ if __name__ == "__main__":
 
     # Start serial communication
     serial = SerialNmeaRead(
-        args.directory, args.port_name, args.baudrate,  args.ftp)
+        args.directory, args.port_name, args.baudrate, args.ftp)
 
     serial.start()
+    logger.info("Logger was started")
 
     # Wait for ending script
     user_input = ""
@@ -31,6 +40,6 @@ if __name__ == "__main__":
         user_input = input("Enter 'q' or 'quit' for cancel script :\n")
 
     serial.stop()
-    print("End of script")
+    logger.info("Logger was stoped")
 
 # TODO: vymazani souboru, aby se nazaplnila pamet

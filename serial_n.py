@@ -4,8 +4,10 @@ import threading
 import pynmea2
 import os
 import re
+import logging
 from rinex_conv import Convert2RinexAndSync
 
+logger = logging.getLogger(__name__)
 
 class SerialNmeaRead(threading.Thread):
     '''
@@ -27,9 +29,9 @@ class SerialNmeaRead(threading.Thread):
             try:
                 os.makedirs(logging_dir)
             except OSError:
-                print("Creation of the directory {} failed".format(logging_dir))
+                logger.exception("Creation of the directory {} failed".format(logging_dir))
             else:
-                print("Successfully created the directory {} ".format(logging_dir))
+                logger.info("Successfully created the directory {} ".format(logging_dir))
 
         actual_file_name = os.path.join(
             logging_dir,  ZDA_file_name)
@@ -84,9 +86,8 @@ class SerialNmeaRead(threading.Thread):
                     with open(self.file_name, "ab") as f:
                         f.write(serial_data)
 
-            except Exception as error:
-                print('Some error in data: ', serial_data)
-                print(error)
+            except Exception:
+                logger.exception("Some error in data: {}".format(serial_data))
 
     def stop(self):
         self._stop_event.set()

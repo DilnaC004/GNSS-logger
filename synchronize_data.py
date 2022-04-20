@@ -2,10 +2,12 @@ import os
 import git
 import urllib.request
 import subprocess
+import logging
 from ftplib import FTP
 
 MAIN_DIR = "GNSS_LOGGER"
 
+logger = logging.getLogger(__name__)
 
 def synchronize_git():
     '''
@@ -25,12 +27,12 @@ def synchronize_git():
             # Upload data to remote Repository - nutne otestovat co se stane, kdyz neni internet
             if internet_connection():
                 r.remotes.origin.push()
-                print("Git - New files uploaded :", untracked_files)
+                logger.info("Git - New files uploaded : {}".format(untracked_files))
             else:
-                print("Git - Cannot synchronize data - no internet connection")
+                logger.error("Git - Cannot synchronize data - no internet connection")
 
         else:
-            print("Git - No changes in repository")
+            logger.info("Git - No changes in repository")
 
 
 def internet_connection(host='http://google.com'):
@@ -46,7 +48,7 @@ def check_git_directory():
     if os.path.isdir(".git"):
         return True
     else:
-        print("Git - Current directory isn't Git repository")
+        logger.info("Git - Current directory isn't Git repository")
         return False
 
 
@@ -87,17 +89,17 @@ def synchronize_ftp(ftp_acess, directory=""):
                             try:
                                 ftp.storbinary(
                                     "STOR {}".format(os.path.basename(file_path)), file)
-                                print("File {} was saved to ftp".format(file_path))
-                            except Exception as error:
-                                print(
-                                    "Problem with saving file {} on ftp:\n{}".format(file_path, error))
+                                logger.info("File {} was saved to ftp".format(file_path))
+                            except Exception:
+                                logger.exception(
+                                    "Problem with saving file {} on ftp".format(file_path))
 
                     else:
-                        print("File {} doesnt exist".format(file_path))
-        except Exception as error:
-            print("Some error in sync data to ftp :\n{}".format(error))
+                        logger.error("File {} doesnt exist".format(file_path))
+        except Exception:
+            logger.exception("Some error in sync data to ftp ")
     else:
-        print("Cannot synchronize data to FTP - no internet connection or ftp access")
+        logger.info("Cannot synchronize data to FTP - no internet connection or ftp access")
 
 
 def synchronize_usb(file_path, directory=""):
@@ -112,12 +114,10 @@ def synchronize_usb(file_path, directory=""):
             # copy files
             out = subprocess.check_output(
                 "cp {} {}".format(file_path, usb_folder_path), shell=True)
-            print("File {} was saved to usb {}".format(
+            logger.info("File {} was saved to usb {}".format(
                 file_path, usb_folder_path))
         except:
-            print("Some error in copying files {}".format(file_path))
-            print(out)
-        pass
+            logger.exception("Some error in copying files {}".format(file_path))
 
 
 def get_files_pc_folder(path):
@@ -154,9 +154,8 @@ def connected_USB():
 
         return usb
 
-    except Exception as err:
-        # print("Some error in finding connected USBs")
-        # print(err)
+    except Exception:
+        logger.exception("Some error in finding connected USBs")
         return []
 
 
