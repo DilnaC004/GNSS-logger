@@ -9,9 +9,18 @@ from datetime import datetime as dt
 setproctitle.setproctitle("cvut_gnns_logger")
 
 actual_time = dt.utcnow()
-logging.basicConfig(filename=actual_time.strftime(
-    "%Y_%m_%d__%H_%M_%S_log.txt"), encoding="utf-8", level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+# set up logger 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+handler = logging.FileHandler(filename=actual_time.strftime(
+    "%Y_%m_%d__%H_%M_%S_log.txt"), mode="w", encoding="utf-8")
+formater = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formater)
+
+logger.addHandler(handler)
+
 
 if __name__ == "__main__":
 

@@ -27,7 +27,16 @@ Nastavení zpráv U-blox přijímače:
 * RXM-SFRBX
 * NMEA-ZDA
 
+Nastaveni crontabu :
+
+```bash
+crontab -e
+
+#vložení řádku - testování běhu skriptu každou minutu 
+*/1 * * * * pgrep cvut_gnss_logger > /dev/null || cd <cest_k_slozce_s_loggerem> && python3 main.py -p /dev/ttyACM0 -b 38400
+```
+
+
 TODO: 
 * mazání zasynchronizovanych dat 
 * opakované odesílání - např. výpadek internetu
-* logování eventů do souboru
