@@ -1,9 +1,12 @@
 import argparse
 import logging
+import setproctitle
 
 from serial_n import SerialNmeaRead
 from datetime import datetime as dt
 
+
+setproctitle.setproctitle("cvut_gnns_logger")
 
 actual_time = dt.utcnow()
 logging.basicConfig(filename=actual_time.strftime(
