@@ -6,7 +6,7 @@ from serial_n import SerialNmeaRead
 from datetime import datetime as dt
 
 
-setproctitle.setproctitle("cvut_gnns_logger")
+setproctitle.setproctitle("GnssLogger")
 
 actual_time = dt.utcnow()
 
