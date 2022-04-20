@@ -155,7 +155,7 @@ def connected_USB():
         return usb
 
     except Exception:
-        logger.exception("Some error in finding connected USBs")
+        logger.error("Cannot find any connected USBs")
         return []
 
 
