@@ -29,7 +29,7 @@ def synchronize_git():
             if internet_connection():
                 r.remotes.origin.push()
                 logger.info(
-                    "Git - New files uploaded : {}".format(untracked_files))
+                    f"Git - New files uploaded : {untracked_files}")
             else:
                 logger.error(
                     "Git - Cannot synchronize data - no internet connection")
@@ -90,21 +90,26 @@ def synchronize_ftp(ftp_acess, directory="", erase: bool = False):
                     if os.path.exists(file_path):
                         with open(file_path, 'rb') as file:
                             try:
-                                ftp.storbinary(
-                                    "STOR {}".format(os.path.basename(file_path)), file)
+                                base_name = os.path.basename(file_path)
+
+                                ftp.storbinary(f"STOR {base_name}", file)
                                 logger.info(
-                                    "File {} was saved to ftp".format(file_path))
+                                    f"File {file_path} was saved to ftp")
 
                                 if erase:
-                                    pass
-                                    # TODO: vymazani po uspesnem nahrani
+                                    # check if file is completely uploaded
+                                    if ftp.size(base_name) == os.path.getsize(file_path):
+                                        os.remove(file_path)
+                                    else:
+                                        logger.error(
+                                            f"File {base_name} wasnt completely uploaded, deletion was postponed")
 
                             except Exception:
                                 logger.exception(
-                                    "Problem with saving file {} on ftp".format(file_path))
+                                    f"Problem with saving file {file_path} on ftp")
 
                     else:
-                        logger.error("File {} doesnt exist".format(file_path))
+                        logger.error(f"File {file_path} doesnt exist")
         except Exception:
             logger.exception("Some error in sync data to ftp ")
     else:
@@ -122,13 +127,12 @@ def synchronize_usb(file_path, directory=""):
             # try to create all folders
             os.makedirs(usb_folder_path, exist_ok=True)
             # copy files
-            out = subprocess.check_output(
-                "cp {} {}".format(file_path, usb_folder_path), shell=True)
-            logger.info("File {} was saved to usb {}".format(
-                file_path, usb_folder_path))
+            subprocess.check_output(
+                f"cp {file_path} {usb_folder_path}", shell=True)
+            logger.info(f"File {file_path} was saved to usb {usb_folder_path}")
         except:
             logger.exception(
-                "Some error in copying files {}".format(file_path))
+                f"Some error in copying files {file_path}")
 
 
 def get_files_pc_folder(path):

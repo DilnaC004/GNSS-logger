@@ -34,11 +34,11 @@ class Convert2RinexAndSync(threading.Thread):
             try:
                 os.mkdir(logging_rinex_dir)
             except OSError:
-                logger.exception("Creation of the directory {} failed".format(
-                    logging_rinex_dir))
+                logger.exception(
+                    f"Creation of the directory {logging_rinex_dir} failed")
             else:
-                logger.info("Successfully created the directory {}".format(
-                    logging_rinex_dir))
+                logger.info(
+                    f"Successfully created the directory {logging_rinex_dir}")
 
         logging_full_path = os.path.join(
             logging_rinex_dir, self.project_directory)
@@ -47,11 +47,11 @@ class Convert2RinexAndSync(threading.Thread):
             try:
                 os.mkdir(logging_full_path)
             except OSError:
-                logger.exception("Creation of the directory {} failed".format(
-                    logging_full_path))
+                logger.exception(
+                    f"Creation of the directory {logging_full_path} failed")
             else:
-                logger.info("Successfully created the directory {}".format(
-                    logging_full_path))
+                logger.info(
+                    f"Successfully created the directory {logging_full_path}")
 
     def run(self):
 
@@ -72,8 +72,9 @@ class Convert2RinexAndSync(threading.Thread):
                 os.path.join("RINEX", self.project_directory, self.log_file_name[:-4]) + ".obs", self.project_directory)
             synchronize_usb(self.log_file_path, self.project_directory)
             if self.ftp_acess is not None:
-                synchronize_ftp(self.ftp_acess, self.project_directory, self.erase)
-                
+                synchronize_ftp(
+                    self.ftp_acess, self.project_directory, self.erase)
+
             logger.info("============================\n")
         except Exception:
             logger.exception(
