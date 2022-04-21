@@ -14,13 +14,14 @@ class SerialNmeaRead(threading.Thread):
     The class with the method that reads the serial port in the backgroud.
     '''
 
-    def __init__(self, directory, com_port, baudrate=38400, ftp_acess=None):
+    def __init__(self, directory, com_port, baudrate=38400, ftp_acess=None, erase=False):
         super().__init__()
         self._stop_event = threading.Event()
         self.directory = directory
         self.serial_object = serial.Serial(com_port, int(baudrate))
         self.ftp_acess = ftp_acess
         self.file_name = ""
+        self.erase = erase
 
     def define_file_name(self, ZDA_file_name):
 
@@ -44,7 +45,7 @@ class SerialNmeaRead(threading.Thread):
             self.file_name = actual_file_name
             # convert *.ubx log to RINEX and synchronize data
             Convert2RinexAndSync(
-                old_file_name, self.directory, self.ftp_acess).start()
+                old_file_name, self.directory, self.ftp_acess, self.erase).start()
 
     def get_ZDA_timestamp(self, serial_data):
 

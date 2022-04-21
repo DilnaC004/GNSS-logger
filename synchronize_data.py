@@ -9,6 +9,7 @@ MAIN_DIR = "GNSS_LOGGER"
 
 logger = logging.getLogger(__name__)
 
+
 def synchronize_git():
     '''
     Function check if actual directory is Git repository and
@@ -27,9 +28,11 @@ def synchronize_git():
             # Upload data to remote Repository - nutne otestovat co se stane, kdyz neni internet
             if internet_connection():
                 r.remotes.origin.push()
-                logger.info("Git - New files uploaded : {}".format(untracked_files))
+                logger.info(
+                    "Git - New files uploaded : {}".format(untracked_files))
             else:
-                logger.error("Git - Cannot synchronize data - no internet connection")
+                logger.error(
+                    "Git - Cannot synchronize data - no internet connection")
 
         else:
             logger.info("Git - No changes in repository")
@@ -52,7 +55,7 @@ def check_git_directory():
         return False
 
 
-def synchronize_ftp(ftp_acess, directory=""):
+def synchronize_ftp(ftp_acess, directory="", erase: bool = False):
 
     if internet_connection() and ftp_acess:
 
@@ -89,7 +92,13 @@ def synchronize_ftp(ftp_acess, directory=""):
                             try:
                                 ftp.storbinary(
                                     "STOR {}".format(os.path.basename(file_path)), file)
-                                logger.info("File {} was saved to ftp".format(file_path))
+                                logger.info(
+                                    "File {} was saved to ftp".format(file_path))
+
+                                if erase:
+                                    pass
+                                    # TODO: vymazani po uspesnem nahrani
+
                             except Exception:
                                 logger.exception(
                                     "Problem with saving file {} on ftp".format(file_path))
@@ -99,7 +108,8 @@ def synchronize_ftp(ftp_acess, directory=""):
         except Exception:
             logger.exception("Some error in sync data to ftp ")
     else:
-        logger.info("Cannot synchronize data to FTP - no internet connection or ftp access")
+        logger.info(
+            "Cannot synchronize data to FTP - no internet connection or ftp access")
 
 
 def synchronize_usb(file_path, directory=""):
@@ -117,7 +127,8 @@ def synchronize_usb(file_path, directory=""):
             logger.info("File {} was saved to usb {}".format(
                 file_path, usb_folder_path))
         except:
-            logger.exception("Some error in copying files {}".format(file_path))
+            logger.exception(
+                "Some error in copying files {}".format(file_path))
 
 
 def get_files_pc_folder(path):
