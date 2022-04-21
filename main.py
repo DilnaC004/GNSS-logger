@@ -61,7 +61,7 @@ if __name__ == "__main__":
         serial.stop()
         logger.info("Logger was stoped")
 
-    except Exception:
-        logger.exception("Some eror in GnssLogger ::")
+    except Exception as error:
+        logger.exception(f"Some eror in GnssLogger :: {error}")
 
 # TODO: vymazani souboru, aby se nazaplnila pamet
