@@ -96,18 +96,18 @@ def synchronize_ftp(ftp_acess, directory="", erase: bool = False):
                                 logger.info(
                                     f"File {file_path} was saved to ftp")
 
-                                if erase:
-                                    # check if file is completely uploaded
-                                    if ftp.size(base_name) == os.path.getsize(file_path):
-                                        os.remove(file_path)
-                                    else:
-                                        logger.error(
-                                            f"File {base_name} wasnt completely uploaded, deletion was postponed")
-
                             except Exception:
                                 logger.exception(
                                     f"Problem with saving file {file_path} on ftp")
 
+                        if erase:
+                            # check if file is completely uploaded
+                            if ftp.size(base_name) == os.path.getsize(file_path):
+                                os.remove(file_path)
+                                logger.info(f"File {file_path} was deleted")
+                            else:
+                                logger.error(
+                                    f"File {base_name} wasnt completely uploaded, deletion was postponed")
                     else:
                         logger.error(f"File {file_path} doesnt exist")
         except Exception:
