@@ -19,10 +19,10 @@ for logger_name in [__name__, "serial_n", "rinex_conv", "synchronize_data"]:
     log.setLevel(logging.DEBUG)
     handler = logging.FileHandler(filename=actual_time.strftime(
         "%Y_%m_%d__%H_%M_%S_log.txt"), mode="a", encoding="utf-8")
-    formater = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formater = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     handler.setFormatter(formater)
     log.addHandler(handler)
-
 
 
 if __name__ == "__main__":
@@ -36,7 +36,7 @@ if __name__ == "__main__":
                     help='The name of the folder where the data will be stored (default "Test")')
     ap.add_argument("-f", "--ftp", default=None,
                     help="FTP access data, format <server_adress>::<user_name>::<password>")
-    ap.add_argument("-e", "--erase", default=False,
+    ap.add_argument("-e", "--erase", default="False",
                     help='Delete log files after FTP synchronization')
     args = ap.parse_args()
 
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
         # Start serial communication
         serial = SerialNmeaRead(
-            args.directory, args.port_name, args.baudrate, args.ftp, args.erase)
+            args.directory, args.port_name, args.baudrate, args.ftp, True if args.erase.upper() == "TRUE" else False)
 
         serial.start()
         logger.info("Logger was started")
