@@ -1,5 +1,4 @@
 import os
-import git
 import urllib.request
 import subprocess
 import logging
@@ -8,34 +7,6 @@ from ftplib import FTP
 MAIN_DIR = "GNSS_LOGGER"
 
 logger = logging.getLogger(__name__)
-
-
-def synchronize_git():
-    '''
-    Function check if actual directory is Git repository and
-    if is, synchronize all untracked files to remote repository.
-    '''
-    if check_git_directory():
-        # Initialize repository
-        r = git.Repo.init(os.path.curdir)
-        # Find untracked files and idexing them
-        untracked_files = r.untracked_files
-        if len(untracked_files) > 0:
-            for uF in untracked_files:
-                r.index.add(uF)
-            # Create commit
-            r.index.commit("Upload new data logs")
-            # Upload data to remote Repository - nutne otestovat co se stane, kdyz neni internet
-            if internet_connection():
-                r.remotes.origin.push()
-                logger.info(
-                    f"Git - New files uploaded : {untracked_files}")
-            else:
-                logger.error(
-                    "Git - Cannot synchronize data - no internet connection")
-
-        else:
-            logger.info("Git - No changes in repository")
 
 
 def internet_connection(host='http://google.com'):
@@ -83,9 +54,10 @@ def synchronize_ftp(ftp_acess, directory="", erase: bool = False):
                     os.path.join("LOGS", directory))
                 ftp_files = ftp.nlst()
 
-                unsync_files = compare_files_pc_ftp(
+                sync_files, unsync_files = compare_files_pc_ftp(
                     log_files, rnx_files, ftp_files, directory)
 
+                # SYNCHRONIZATION UNSYNC FILES TO FTP
                 for file_path in unsync_files:
                     if os.path.exists(file_path):
                         with open(file_path, 'rb') as file:
@@ -99,17 +71,24 @@ def synchronize_ftp(ftp_acess, directory="", erase: bool = False):
                             except Exception:
                                 logger.exception(
                                     f"Problem with saving file {file_path} on ftp")
+                    else:
+                        logger.error(f"File {file_path} doesnt exist")
 
-                        if erase:
+                # DELETE SYNC FILES FROM LOCAL STORAGE
+                if erase:
+                    for deleting_path in sync_files:
+                        try:
+                            base_name = os.path.basename(file_path)
                             # check if file is completely uploaded
-                            if ftp.size(base_name) == os.path.getsize(file_path):
+                            if ftp.size(base_name) == os.path.getsize(deleting_path):
                                 os.remove(file_path)
                                 logger.info(f"File {file_path} was deleted")
                             else:
                                 logger.error(
                                     f"File {base_name} wasnt completely uploaded, deletion was postponed")
-                    else:
-                        logger.error(f"File {file_path} doesnt exist")
+                        except Exception:
+                            logger.exception(
+                                f"Problem with deleting file {deleting_path}")
         except Exception:
             logger.exception("Some error in sync data to ftp ")
     else:
@@ -142,16 +121,23 @@ def get_files_pc_folder(path):
 def compare_files_pc_ftp(pc_log, pc_rnx, ftp_all, directory):
 
     no_sync_files = []
+    sync_files = []
 
     for f in pc_log:
+        log_path = os.path.join("LOGS", directory, f)
         if not (f in ftp_all):
-            no_sync_files.append(os.path.join("LOGS", directory, f))
+            no_sync_files.append(log_path)
+        else:
+            sync_files.append(log_path)
 
     for f in pc_rnx:
+        rnx_path = os.path.join("RINEX", directory, f)
         if not (f in ftp_all):
-            no_sync_files.append(os.path.join("RINEX", directory, f))
+            no_sync_files.append(rnx_path)
+        else:
+            sync_files.append(rnx_path)
 
-    return no_sync_files
+    return sync_files, no_sync_files
 
 
 def connected_USB():
@@ -176,3 +162,6 @@ def connected_USB():
 
 if __name__ == "__main__":
     print(connected_USB())
+
+    for u in connected_USB():
+        print(f"USB -- {u}")
