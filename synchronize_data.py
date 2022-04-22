@@ -78,11 +78,12 @@ def synchronize_ftp(ftp_acess, directory="", erase: bool = False):
                 if erase:
                     for deleting_path in sync_files:
                         try:
-                            base_name = os.path.basename(file_path)
+                            base_name = os.path.basename(deleting_path)
                             # check if file is completely uploaded
                             if ftp.size(base_name) == os.path.getsize(deleting_path):
-                                os.remove(file_path)
-                                logger.info(f"File {file_path} was deleted")
+                                os.remove(deleting_path)
+                                logger.info(
+                                    f"File {deleting_path} was deleted")
                             else:
                                 logger.error(
                                     f"File {base_name} wasnt completely uploaded, deletion was postponed")
