@@ -56,12 +56,15 @@ if __name__ == "__main__":
         user_input = ""
 
         while user_input not in ["q", "quit"]:
-            user_input = input("Enter 'q' or 'quit' for cancel script :\n")
-
-        serial.stop()
-        logger.info("Logger was stoped")
+            try:
+                user_input = input("Enter 'q' or 'quit' for cancel script :\n")
+            except EOFError:
+                logger.error("EOF error on start script")
 
     except Exception as error:
         logger.exception(f"Some eror in GnssLogger :: {error}")
+
+    serial.stop()
+    logger.info("Logger was stoped")
 
 # TODO: vymazani souboru, aby se nazaplnila pamet
