@@ -48,7 +48,7 @@ class SerialNmeaRead(threading.Thread):
             self.file_name = actual_file_name
             # convert *.ubx log to RINEX and synchronize data
             Convert2RinexAndSync(
-                old_file_name, self.directory, self.ftp_acess, self.erase).start()
+                old_file_name, self.directory, self.ftp_acess, self.erase, [self.file_name]).start()
 
     def get_ZDA_timestamp(self, serial_data):
 

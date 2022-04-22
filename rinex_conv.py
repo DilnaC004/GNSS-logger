@@ -18,7 +18,7 @@ class Convert2RinexAndSync(threading.Thread):
     After that are all files synchronized.
     '''
 
-    def __init__(self, log_file_path, project_directory="Test", ftp_acess=None, erase: bool = False):
+    def __init__(self, log_file_path, project_directory="Test", ftp_acess=None, erase: bool = False, ignore_files: list = []):
         super().__init__()
         self._stop_event = threading.Event()
         self.log_file_path = log_file_path
@@ -26,6 +26,7 @@ class Convert2RinexAndSync(threading.Thread):
         self.project_directory = project_directory
         self.ftp_acess = ftp_acess
         self.erase = erase
+        self.ignore_files = ignore_files
 
     def check_folder(self):
 
@@ -73,7 +74,7 @@ class Convert2RinexAndSync(threading.Thread):
             synchronize_usb(self.log_file_path, self.project_directory)
             if self.ftp_acess is not None:
                 synchronize_ftp(
-                    self.ftp_acess, self.project_directory, self.erase)
+                    self.ftp_acess, self.project_directory, self.erase, self.ignore_files)
 
             logger.info("============================\n")
         except Exception:

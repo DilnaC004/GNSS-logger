@@ -17,17 +17,15 @@ def internet_connection(host='http://google.com'):
         return False
 
 
-def check_git_directory():
+def synchronize_ftp(ftp_acess, directory="", erase: bool = False, ignore_files: list = []):
+    """FTP sync function
 
-    if os.path.isdir(".git"):
-        return True
-    else:
-        logger.info("Git - Current directory isn't Git repository")
-        return False
-
-
-def synchronize_ftp(ftp_acess, directory="", erase: bool = False):
-
+    Args:
+        ftp_acess (_type_): <server_adress>::<user_name>::<password>
+        directory (str, optional): Path to directory which has to be synchronize. Defaults to "".
+        erase (bool, optional): Delete files after synchronization. Defaults to False.
+        ignore_files (list, optional): Ignore files to synchronization, mainly use for actual loging file . Defaults to [].
+    """
     if internet_connection() and ftp_acess:
 
         try:
@@ -58,7 +56,7 @@ def synchronize_ftp(ftp_acess, directory="", erase: bool = False):
                     log_files, rnx_files, ftp_files, directory)
 
                 # SYNCHRONIZATION UNSYNC FILES TO FTP
-                for file_path in unsync_files:
+                for file_path in (f for f in unsync_files if f not in ignore_files):
                     if os.path.exists(file_path):
                         with open(file_path, 'rb') as file:
                             try:
@@ -76,7 +74,7 @@ def synchronize_ftp(ftp_acess, directory="", erase: bool = False):
 
                 # DELETE SYNC FILES FROM LOCAL STORAGE
                 if erase:
-                    for deleting_path in sync_files:
+                    for deleting_path in (d for d in sync_files if d not in ignore_files):
                         try:
                             base_name = os.path.basename(deleting_path)
                             # check if file is completely uploaded
