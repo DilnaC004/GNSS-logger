@@ -1,6 +1,7 @@
 import argparse
 import logging
 import setproctitle
+import time
 
 from serial_n import SerialNmeaRead
 from datetime import datetime as dt
@@ -57,9 +58,11 @@ if __name__ == "__main__":
 
         while user_input not in ["q", "quit"]:
             try:
+                # Error handling crontab no input
                 user_input = input("Enter 'q' or 'quit' for cancel script :\n")
+                time.sleep(1)
             except EOFError:
-                logger.error("EOF error on start script")
+                pass
 
     except Exception as error:
         logger.exception(f"Some eror in GnssLogger :: {error}")
