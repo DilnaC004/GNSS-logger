@@ -12,6 +12,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: pip3 install -r requirements.txt
       - name: Package Application - Pyinstaller
         run: pyinstaller main.py --onefile
       - name: Copy convbin.exe
