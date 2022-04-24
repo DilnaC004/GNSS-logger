@@ -15,7 +15,7 @@ jobs:
       - name: Package Application - Pyinstaller
         run: pyinstaller main.py --onefile
       - name: Copy convbin.exe
-      - run: cp convbin.exe /dist/convbin.exe
+        run: cp convbin.exe /dist/convbin.exe
       - uses: actions/upload-artifact@v2
         with:
           name: GnssLogger
