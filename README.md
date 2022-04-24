@@ -29,7 +29,7 @@ Nastavení zpráv U-blox přijímače:
 - RXM-SFRBX
 - NMEA-ZDA
 
-Nastaveni crontabu :
+## Nastaveni crontabu :
 
 ```bash
 crontab -e
@@ -37,6 +37,17 @@ crontab -e
 #vložení řádku - testování běhu skriptu každou minutu
 */1 * * * * pgrep GnssLogger > /dev/null || cd ~/Repos/GNSS-logger && python3 main.py -p /dev/ttyACM0 -b 38400 -f <server_adress>::<user_name>::<password>
 ```
+
+## Spouštění zkompilovaného programu:
+
+Zkompilovaný program lze stáhnout ze záložky actions, popřípadě v Realeses.
+Spouštění probíhá podobně, jen není nutné instalovat knihovny.
+
+```bash
+./GnssLogger -p /dev/ttyACM0 -b 38400 -d .
+```
+
+Obdobně je nutné upravit i název v crontabu.
 
 TODO:
 
