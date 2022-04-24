@@ -16,13 +16,9 @@ jobs:
         run: pip3 install -r requirements.txt
       - name: Package Application - Pyinstaller
         run: pyinstaller main.py --onefile --name GnssLogger
-      - name: Tree
-        run: tree
-      - name: PWD
-        run: pwd
-      - name: Copy convbin.exe
-        run: cp convbin.exe ./dist/
+      - name: Copy FILES
+        run: cp -t ./dist/ convbin.exe README.md
       - uses: actions/upload-artifact@v2
         with:
           name: GnssLogger
-          path: /dist/
+          path: ./dist/
