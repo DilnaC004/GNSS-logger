@@ -49,6 +49,20 @@ Spouštění probíhá podobně, jen není nutné instalovat knihovny.
 
 Obdobně je nutné upravit i název v crontabu.
 
-TODO:
+## Průběžné promazávání souborů:
 
-- mazání zasynchronizovanych dat po X měsících (asi další skript)
+Aby nedošlo k přeplnění paměti na počítači, je zde přiložen skript "test_and_delete.py":
+
+```bash
+python3 test_and_delete.py
+-h |        : nápověda
+-d | --days : Soubory ve složkách LOGS a RINEX, které byly naposledy upraveny déle než je stanovený počet dnů budou vymazány. Defaultně 30 dnů.
+```
+
+Tuto úlohu je možné automatizovat v cronu, např. vymazání souborů naposledy upraveny před déle než 45 dny s kontrolou každý den v 0:00.
+
+```bash
+crontab -e
+
+0 0 */1 * * cd ~/Repos/GNSS-logger && python3 test_and_delete.py --days 45
+```
