@@ -16,6 +16,8 @@ jobs:
         run: pip3 install -r requirements.txt
       - name: Package Application - Pyinstaller
         run: pyinstaller main.py --onefile
+      - name: Tree
+        run: tree
       - name: Copy convbin.exe
         run: cp convbin.exe /dist/convbin.exe
       - uses: actions/upload-artifact@v2
