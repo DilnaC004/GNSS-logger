@@ -2,24 +2,21 @@ name: PyInstaller compilation
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Package Application
-      uses: JackMcKew/pyinstaller-action-linux@main
-      with:
-        path: .
-    - run: tree
-    - uses: actions/upload-artifact@v2
-      with:
-        name: name-of-artifact
-        path: /dist/Linux
+      - uses: actions/checkout@v2
+      - name: Package Application - Pyinstaller
+        run: pyinstaller main.py --onefile
+      - name: Copy convbin.exe
+      - run: cp convbin.exe /dist/convbin.exe
+      - uses: actions/upload-artifact@v2
+        with:
+          name: GnssLogger
+          path: /dist/
