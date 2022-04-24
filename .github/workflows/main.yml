@@ -18,8 +18,10 @@ jobs:
         run: pyinstaller main.py --onefile --name GnssLogger
       - name: Tree
         run: tree
+      - name: PWD
+        run: pwd
       - name: Copy convbin.exe
-        run: cp convbin.exe /dist/
+        run: cp convbin.exe ./dist/
       - uses: actions/upload-artifact@v2
         with:
           name: GnssLogger
