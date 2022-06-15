@@ -1,13 +1,28 @@
-import threading
-import subprocess
 import os
 import logging
+import platform
+import threading
+import subprocess
+
 from synchronize_data import synchronize_ftp, synchronize_usb
 
 logger = logging.getLogger(__name__)
 
-if not os.path.exists("convbin.exe"):
-    raise Exception("This folder doesnt contain convbin.exe, its mandatory")
+CURRENT_SYSTEM = platform.system()
+
+if CURRENT_SYSTEM == "Windows":
+    PROCESSING_PROGRAM = "convbin.exe"
+    if not os.path.exists(PROCESSING_PROGRAM):
+        raise Exception(
+            f"{CURRENT_SYSTEM} -- This folder doesnt contain convbin.exe, its mandatory")
+if CURRENT_SYSTEM == "Linux":
+    PROCESSING_PROGRAM = "./convbin"
+    if not os.path.exists(PROCESSING_PROGRAM):
+        raise Exception(
+            f"{CURRENT_SYSTEM} -- This folder doesnt contain convbin, its mandatory")
+else:
+    raise Exception(
+        f"This operating system isnt supported -- {CURRENT_SYSTEM}")
 
 
 class Convert2RinexAndSync(threading.Thread):
@@ -27,6 +42,7 @@ class Convert2RinexAndSync(threading.Thread):
         self.ftp_acess = ftp_acess
         self.erase = erase
         self.ignore_files = ignore_files
+        self.processing_program = PROCESSING_PROGRAM
 
     def check_folder(self):
 
@@ -55,13 +71,17 @@ class Convert2RinexAndSync(threading.Thread):
                     f"Successfully created the directory {logging_full_path}")
 
     def run(self):
+        try:
+            self.check_folder()
 
-        self.check_folder()
+            file_name_with_dir = os.path.join(
+                self.project_directory, self.log_file_name)
+            subprocess.run("{0} -od -os -oi -ot -f 2 -hc 'GNSS logger application' -o ./RINEX/{1}.obs ./LOGS/{1}.ubx".format(
+                self.processing_program, file_name_with_dir[0:-4]), shell=True)
+        except Exception:
+            logger.exception(
+                "Some error in converting ubx to RINEX file")
 
-        file_name_with_dir = os.path.join(
-            self.project_directory, self.log_file_name)
-        subprocess.run("convbin -od -os -oi -ot -f 2 -hc 'GNSS logger application' -o ./RINEX/{0}.obs ./LOGS/{0}.ubx".format(
-            file_name_with_dir[0:-4]), shell=True)
         self.stop()
 
     def stop(self):
