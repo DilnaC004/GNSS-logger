@@ -59,7 +59,7 @@ if __name__ == "__main__":
         while user_input not in ["q", "quit"]:
             try:
                 # Error handling crontab no input
-                user_input = input("Enter 'q' or 'quit' for cancel script :\n")
+                # user_input = input("Enter 'q' or 'quit' for cancel script :\n")
                 time.sleep(1)
             except EOFError:
                 pass
@@ -69,5 +69,3 @@ if __name__ == "__main__":
 
     serial.stop()
     logger.info("Logger was stoped")
-
-# TODO: vymazani souboru, aby se nazaplnila pamet

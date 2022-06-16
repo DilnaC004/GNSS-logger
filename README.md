@@ -66,3 +66,34 @@ crontab -e
 
 0 0 */1 * * cd ~/Repos/GNSS-logger && python3 test_and_delete.py --days 45
 ```
+
+## HELPER
+
+### Nastvaní přístupu k seriovému portu Linux
+
+```bash
+    sudo usermod -a -G dialout $USER
+```
+
+### Nastaveni automountovnání připojených disků:
+
+- instalace usbmount
+
+```bash
+    sudo apt install usbmount
+```
+
+- vypnutí privatniho mountovani:
+
+  - úprava souboru `/lib/systemd/system/systemd-udevd.service`
+  - vypnutí privátního mountovaní `PrivateMounts=no`
+  - reboot
+
+- automatické nastavení práv zápisu
+  - úprava souboru `/etc/usbmount/usbmount.conf`
+  - nastavení mountování `FS_MOUNTOPTIONS="-fstype=vfat,uid=1000,gid=1000,dmask=0007,fmask=0177"`
+
+### Když nefunguje na vašem PC aplikace convbin:
+
+Je možné jí zbuildit přímo na raspberry a pak jí nahrát do adresáře GNSS-logger
+postup je zde https://rtklibexplorer.wordpress.com/2020/12/18/building-rtklib-code-in-linux/
