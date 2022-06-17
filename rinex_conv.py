@@ -93,7 +93,7 @@ class Convert2RinexAndSync(threading.Thread):
     def compress_files(self, file_paths: list):
         for path in file_paths:
             try:
-                subprocess.run("gzip {path}", shell=True)
+                subprocess.run(f"gzip {path}", shell=True)
             except Exception as error:
                 logger.exception(
                     f"File {path} cannot be compressed :\n{error}")
