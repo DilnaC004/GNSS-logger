@@ -33,7 +33,7 @@ class Convert2RinexAndSync(threading.Thread):
     After that are all files synchronized.
     '''
 
-    def __init__(self, log_file_path, project_directory="Test", ftp_acess=None, erase: bool = False, ignore_files: list = []):
+    def __init__(self, log_file_path, project_directory="Test", ftp_acess=None, erase: bool = False, ignore_files: list = [], compress: bool = False):
         super().__init__()
         self._stop_event = threading.Event()
         self.log_file_path = log_file_path
@@ -42,6 +42,7 @@ class Convert2RinexAndSync(threading.Thread):
         self.ftp_acess = ftp_acess
         self.erase = erase
         self.ignore_files = ignore_files
+        self.compress = compress
         self.processing_program = PROCESSING_PROGRAM
 
     def check_folder(self):
@@ -74,24 +75,39 @@ class Convert2RinexAndSync(threading.Thread):
         try:
             self.check_folder()
 
-            file_name_with_dir = os.path.join(
-                self.project_directory, self.log_file_name)
-            subprocess.run("{0} -od -os -oi -ot -f 2 -hc 'GNSS logger application' -o ./RINEX/{1}.obs ./LOGS/{1}.ubx".format(
-                self.processing_program, file_name_with_dir[0:-4]), shell=True)
+            f_dir = os.path.join(self.project_directory, self.log_file_name)
+            f_dir = f_dir[0:-4]
+            subprocess.run(
+                f"{self.processing_program} -od -os -oi -ot -f 2 -hc 'GNSS logger application' -o ./RINEX/{f_dir}.obs ./LOGS/{f_dir}.ubx", shell=True)
+
         except Exception:
             logger.exception(
-                "Some error in converting ubx to RINEX file")
+                f"Some error in converting ubx to RINEX file : {f_dir}")
+
+        if self.compress:
+            self.compress_files(
+                [f"./RINEX/{f_dir}.obs", f"./LOGS/{f_dir}.ubx"])
 
         self.stop()
+
+    def compress_files(self, file_paths: list):
+        for path in file_paths:
+            try:
+                subprocess.run("gzip {path}")
+            except Exception as error:
+                logger.exception(
+                    f"File {path} cannot be compressed :\n{error}")
 
     def stop(self):
         self._stop_event.set()
         logger.info("Converting to RINEX is done:")
         logger.info("============================")
         try:
+            appendix = ".gz" if self.compress else ""
             synchronize_usb(
-                os.path.join("RINEX", self.project_directory, self.log_file_name[:-4]) + ".obs", self.project_directory)
-            synchronize_usb(self.log_file_path, self.project_directory)
+                os.path.join("RINEX", self.project_directory, self.log_file_name[:-4]) + ".obs" + appendix, self.project_directory)
+            synchronize_usb(self.log_file_path + appendix,
+                            self.project_directory)
             if self.ftp_acess is not None:
                 synchronize_ftp(
                     self.ftp_acess, self.project_directory, self.erase, self.ignore_files)
