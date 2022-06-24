@@ -6,10 +6,10 @@ import time
 from serial_n import SerialNmeaRead
 from datetime import datetime as dt
 
-
 setproctitle.setproctitle("GnssLogger")
 
 actual_time = dt.utcnow()
+
 
 # set up loggers
 logger = logging.getLogger(__name__)
@@ -38,17 +38,28 @@ if __name__ == "__main__":
     ap.add_argument("-f", "--ftp", default=None,
                     help="FTP access data, format <server_adress>::<user_name>::<password>")
     ap.add_argument("-e", "--erase", default="False",
-                    help='Delete log files after FTP synchronization')
+                    help='Delete log files after FTP synchronization (bool) : true | false - default false')
+    ap.add_argument("-c", "--compress", default="False",
+                    help='Compress files via gzip (bool) : true | false - default false')
     args = ap.parse_args()
 
     if isinstance(args.ftp, str) and len(args.ftp.split("::")) != 3:
         ap.error("Argument FTP isnt in correct format")
 
+    def t_or_f(arg_str: str) -> bool:
+
+        if arg_str.upper() == "TRUE":
+            return True
+        elif arg_str.upper() == "FALSE":
+            return False
+        else:
+            raise ValueError("Input value has to be boolean (true|false).")
+
     try:
 
         # Start serial communication
         serial = SerialNmeaRead(
-            args.directory, args.port_name, args.baudrate, args.ftp, True if args.erase.upper() == "TRUE" else False)
+            args.directory, args.port_name, args.baudrate, args.ftp, t_or_f(args.erase), t_or_f(args.compress))
 
         serial.start()
         logger.info("Logger was started")
@@ -58,7 +69,7 @@ if __name__ == "__main__":
 
         while user_input not in ["q", "quit"]:
             try:
-                # Error handling crontab no input
+                # Error handling crontab no input # uncoment only if you use as terminal app
                 # user_input = input("Enter 'q' or 'quit' for cancel script :\n")
                 time.sleep(1)
             except EOFError:

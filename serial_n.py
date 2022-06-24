@@ -1,10 +1,9 @@
-import time
-import serial
-import threading
-import pynmea2
 import os
 import re
+import serial
 import logging
+import pynmea2
+import threading
 from rinex_conv import Convert2RinexAndSync
 
 logger = logging.getLogger(__name__)
@@ -15,7 +14,7 @@ class SerialNmeaRead(threading.Thread):
     The class with the method that reads the serial port in the backgroud.
     '''
 
-    def __init__(self, directory, com_port, baudrate=38400, ftp_acess=None, erase=False):
+    def __init__(self, directory: str, com_port: str, baudrate: int = 38400, ftp_acess: str = None, erase: bool = False, compress: bool = False):
         super().__init__()
         self._stop_event = threading.Event()
         self.directory = directory
@@ -23,8 +22,9 @@ class SerialNmeaRead(threading.Thread):
         self.ftp_acess = ftp_acess
         self.file_name = ""
         self.erase = erase
+        self.compress = compress
 
-    def define_file_name(self, ZDA_file_name):
+    def define_file_name(self, ZDA_file_name: str):
 
         logging_dir = os.path.join("LOGS", self.directory)
         if not os.path.exists(logging_dir):
@@ -48,23 +48,27 @@ class SerialNmeaRead(threading.Thread):
             self.file_name = actual_file_name
             # convert *.ubx log to RINEX and synchronize data
             Convert2RinexAndSync(
-                old_file_name, self.directory, self.ftp_acess, self.erase, [self.file_name]).start()
+                old_file_name, self.directory, self.ftp_acess, self.erase, [self.file_name], self.compress).start()
 
-    def get_ZDA_timestamp(self, serial_data):
+    def get_ZDA_timestamp(self, serial_data: str):
 
         match = re.search("\$GNZDA.*\*..", serial_data)
 
         if match:
             ZDA_message = serial_data[match.start():match.end()]
             ZDA_parse = pynmea2.parse(ZDA_message)
-            ZDA_file_name = str(ZDA_parse.year) + "_" + str(ZDA_parse.month) + "_" + \
-                str(ZDA_parse.day) + "_" + \
-                str(ZDA_parse.timestamp)[0:2] + "_00_00.ubx"
-            # str(ZDA_parse.timestamp)[0:2] + "_" + \ # FOR DEVELOP log in minutes
-            # str(ZDA_parse.timestamp)[3:5] + "_00.ubx"
+
+            # if develop TRUE, files will be separated after 10 minutes
+            BOOL_DEVELOP = False
+
+            if BOOL_DEVELOP:
+                ZDA_file_name = f"{ZDA_parse.year}_{ZDA_parse.month}_{ZDA_parse.day}_{str(ZDA_parse.timestamp)[0:2]}_{str(ZDA_parse.timestamp)[3]}0_00.ubx"
+            else:
+                ZDA_file_name = f"{ZDA_parse.year}_{ZDA_parse.month}_{ZDA_parse.day}_{str(ZDA_parse.timestamp)[0:2]}_00_00.ubx"
+
             self.define_file_name(ZDA_file_name)
 
-    def get_GGA_timestamp(self, serial_data):
+    def get_GGA_timestamp(self, serial_data: str):
 
         match = re.search("\$GNGGA.*\*..", serial_data)
 
