@@ -15,6 +15,7 @@ parametry :
 -d | --directory : specifikováni nazvu projektu do jehož slozky se budou data ukládat (defaultně "Test")
 -f | --ftp       : přístupové údaje na ftp server, formát  <server_adress>::<user_name>::<password> (defaultně None)
 -e | --erase     : vymazání lokálních souborů, po úspěšném nahrání na FTP server
+-c | --compress  : komprese souboru skrze gzip (bool - defaultně "False")
 ```
 
 příklad spuštění :
