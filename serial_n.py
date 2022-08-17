@@ -40,9 +40,18 @@ class SerialNmeaRead(threading.Thread):
         actual_file_name = os.path.join(
             logging_dir, ZDA_file_name)
 
+        actual_file_str = f"Actual logging file is {actual_file_name} ."
+
         if self.file_name == "":
             self.file_name = actual_file_name
+
+            logger.info(actual_file_str)
+            print(actual_file_str)
+
         elif self.file_name != actual_file_name:
+            logger.info(actual_file_str)
+            print(actual_file_str)
+
             old_file_name = self.file_name
             # update new name
             self.file_name = actual_file_name
@@ -58,7 +67,7 @@ class SerialNmeaRead(threading.Thread):
             ZDA_message = serial_data[match.start():match.end()]
             ZDA_parse = pynmea2.parse(ZDA_message)
 
-            # if develop TRUE, files will be separated after 10 minutes
+            # if develop True, files will be separated after 10 minutes
             BOOL_DEVELOP = False
 
             if BOOL_DEVELOP:
@@ -82,9 +91,8 @@ class SerialNmeaRead(threading.Thread):
         The method that actually gets data from the port
         '''
         while not self.stopped():
-            serial_data = self.serial_object.readline()
-
             try:
+                serial_data = self.serial_object.readline()
 
                 self.get_ZDA_timestamp(
                     serial_data.decode("ascii", errors="replace"))

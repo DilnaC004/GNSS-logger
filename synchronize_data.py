@@ -65,6 +65,7 @@ def synchronize_ftp(ftp_acess, directory="", erase: bool = False, ignore_files: 
                                 ftp.storbinary(f"STOR {base_name}", file)
                                 logger.info(
                                     f"File {file_path} was saved to ftp")
+                                print(f"File {file_path} was saved to ftp")
 
                             except Exception:
                                 logger.exception(
@@ -82,6 +83,7 @@ def synchronize_ftp(ftp_acess, directory="", erase: bool = False, ignore_files: 
                                 os.remove(deleting_path)
                                 logger.info(
                                     f"File {deleting_path} was deleted")
+                                print(f"File {deleting_path} was deleted")
                             else:
                                 logger.error(
                                     f"File {base_name} wasnt completely uploaded, deletion was postponed")
@@ -160,7 +162,14 @@ def connected_USB():
 
 
 if __name__ == "__main__":
-    print(connected_USB())
+
+    print("Connected USB storage :")
 
     for u in connected_USB():
         print(f"USB -- {u}")
+
+    print("Test FTP synchronization :")
+    print("==========================")
+
+    #synchronize_ftp("ftp.irsm.cas.cz::zdenekv::Zdenekv12", "Test")
+    synchronize_ftp("5.189.130.203::ftpuser::Laborato5", "Test")
